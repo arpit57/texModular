@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draw Bounding Boxes on Video</title>
+    <style>
+        #canvas {
+            max-width: 100%;
+            border: 1px solid #000;
+        }
+
+        #button-container {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Draw Bounding Boxes on Video</h1>
+    <p id="statusText">Select bounding box for: <strong>Pickup</strong></p>
+    <p id="selectedCoords">Selected Coordinates: None</p>
+    <p id="selectedSides">Selected Sides: None</p>
+
+    <!-- Video Upload Input -->
+    <input type="file" id="videoUpload" name="videoUpload" accept="video/*">
+    <input type="text" id="videoUrl" placeholder="Enter video URL" />
+
+    <canvas id="canvas" width="640" height="480"></canvas>
+    <video id="videoElement" style="display:none;" width="640" height="480" preload="metadata"></video>
+    <img id="videoStream" style="display:none;" alt="Video Stream"/>
+    <div id="button-container">
+        <button id="save">Save Coordinates</button>
+        <button id="pickup">Pickup</button>
+        <button id="drop">Drop</button>
+    </div>
+
+    <div id="edge-selection">
+        <button class="edge-button" data-edge="left">Left</button>
+        <button class="edge-button" data-edge="right">Right</button>
+        <button class="edge-button" data-edge="bottom">Bottom</button>
+        <button class="edge-button" data-edge="top">Top</button>
+    </div>
+
+    <script>
+        let pickupEdges = []; // Initialize empty array for pickup sides
+        let dropEdges = []; // Initialize empty array for drop sides
+
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+        const saveButton = document.getElementById('save');
+        const pickupButton = document.getElementById('pickup');
+        const dropButton = document.getElementById('drop');
+        const statusText = document.getElementById('statusText');
+        const video = document.getElementById('videoElement');
+        const videoUrlInput = document.getElementById('videoUrl');
+        const videoStream = document.getElementById('videoStream');
+        const videoElement = document.getElementById('videoElement');
+
+        let isDrawing = false;
+        let startX = 0;
+        let startY = 0;
+        let endX = 0;
+        let endY = 0;
+        let currentBox = "pickup";
+        let pickupCoords = {};
+        let dropCoords = {};
+
+        // Function to handle drawing on the canvas
+        function drawOnCanvas() {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            if (videoElement.style.display !== 'none') {
+                context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+            } else if (videoStream.style.display !== 'none') {
+                context.drawImage(videoStream, 0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        // Load video from file
+        function loadVideoFrameFromFile(url) {
+            videoElement.src = url;
+            videoElement.load();
+            videoElement.addEventListener('loadedmetadata', () => {
+                videoElement.currentTime = 0.1;
+            });
+        }
+
+        function loadVideoFrameFromURL(videoSource) {
+            videoStream.src = videoSource;
+            videoStream.onload = () => {
+                redrawCanvas();
+                // Do not hide the videoStream element; it should stay loaded in the background
+            };
+            videoStream.onerror = () => {
+                console.error('The video failed to load.');
+                // Do not hide the videoStream element; it should stay loaded in the background
+            };
+        }
+
+        // This function redraws the frame on the canvas, keeping the last drawn image intact
+        function redrawCanvas() {
+            // Only clear the canvas if there is no drawing in progress
+            if (!isDrawing) {
+                context.clearRect(0, 0, canvas.width, canvas.height);
+            }
+            // Always draw the frame from the video or image source
+            if (videoElement.src) {
+                context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+            } else if (videoStream.src) {
+                context.drawImage(videoStream, 0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        // Edge Selection Logic
+        const edgeButtons = document.querySelectorAll('.edge-button');
+        edgeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const edge = this.getAttribute('data-edge');
+                if (currentBox === "pickup") {
+                    toggleEdge(pickupEdges, edge);
+                } else if (currentBox === "drop") {
+                    toggleEdge(dropEdges, edge);
+                }
+                this.classList.toggle('selected');
+            });
+        });
+
+        function toggleEdge(edgesArray, edge) {
+            const index = edgesArray.indexOf(edge);
+            if (index > -1) {
+                edgesArray.splice(index, 1);
+            } else {
+                edgesArray.push(edge);
+            }
+            const selectedSidesText = `Selected Sides: Pickup (${pickupEdges.join(', ')}) Drop (${dropEdges.join(', ')})`;
+            document.getElementById('selectedSides').innerText = selectedSidesText;
+            updateSelectedSides();
+        }
+
+        function updateSelectedSides() {
+        // This function updates the selected sides text
+        const selectedSidesText = `Selected Sides: Pickup (${pickupEdges.join(', ')}) Drop (${dropEdges.join(', ')})`;
+        document.getElementById('selectedSides').innerText = selectedSidesText;
+        }
+
+
+        videoUrlInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const videoUrl = videoUrlInput.value;
+                videoElement.style.display = 'none'; // Hide the video element
+                loadVideoFrameFromURL(videoUrl); // Load and display video on canvas
+            }
+        });
+
+        document.getElementById('videoUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const url = URL.createObjectURL(file);
+                videoStream.style.display = 'none'; // Hide the image element
+                loadVideoFrameFromFile(url);
+            }
+        });
+        
+        videoElement.addEventListener('loadedmetadata', function() {
+            videoElement.currentTime = 0.1;
+            drawOnCanvas();  // Call drawOnCanvas here to ensure the frame is drawn immediately
+        });
+
+        videoElement.addEventListener('timeupdate', function() {
+            if (videoElement.currentTime < 0.2) {
+                drawOnCanvas();
+                videoElement.pause(); // Pause after drawing frame
+            }
+        });
+
+        pickupButton.addEventListener('click', function() {
+            currentBox = "pickup";
+            statusText.innerHTML = "Select bounding box for: <strong>Pickup</strong>";
+            updateSelectedSides();
+        });
+
+        dropButton.addEventListener('click', function() {
+            currentBox = "drop";
+            statusText.innerHTML = "Select bounding box for: <strong>Drop</strong>";
+            updateSelectedSides();
+        });
+
+        canvas.addEventListener('mousedown', (e) => {
+        isDrawing = true;
+        [startX, startY] = [e.offsetX, e.offsetY];
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDrawing) return;
+            redrawCanvas();
+            endX = e.offsetX;
+            endY = e.offsetY;
+            context.beginPath();
+            context.rect(startX, startY, endX - startX, endY - startY);
+            context.strokeStyle = 'red';
+            context.stroke();
+        });
+
+        canvas.addEventListener('mouseup', () => {
+        if (!isDrawing) return;
+        isDrawing = false;
+        if (currentBox === "pickup") {
+            pickupCoords = { startX, startY, endX, endY };
+        } else {
+            dropCoords = { startX, startY, endX, endY };
+        }
+        const selectedCoordsText = `Selected Coordinates: ${currentBox.charAt(0).toUpperCase() + currentBox.slice(1)} (${startX}, ${startY}) to (${endX}, ${endY})`;
+        document.getElementById('selectedCoords').innerText = selectedCoordsText;
+        redrawCanvas();
+        });
+
+        saveButton.addEventListener('click', async function() {
+            const videoFile = document.getElementById('videoUpload').files[0];
+            const videoUrl = document.getElementById('videoUrl').value;
+            
+            if (!videoFile && !videoUrl) {
+                alert("Please upload a video file or enter a video URL.");
+                return;
+            }
+
+            if (!pickupCoords.startX || !dropCoords.startX) {
+                alert("Please draw both Pickup and Drop bounding boxes before saving.");
+                return;
+            }
+
+            let videoPath = videoFile ? `/home/arpit/Testing/texModular/videos/${videoFile.name}` : videoUrl;
+
+            // Now send both the video path (or URL) and the coordinates to the backend
+            const coordinatesData = {
+                video_path: videoPath, // Send the video file path or the video URL
+                pickup_coords: [[pickupCoords.startX, pickupCoords.startY], [pickupCoords.endX, pickupCoords.endY]], 
+                drop_coords: [[dropCoords.startX, dropCoords.startY], [dropCoords.endX, dropCoords.endY]],
+                pickup_sides: pickupEdges,
+                drop_sides: dropEdges
+            };
+
+            try {
+                let jsonUpdateResponse = await fetch('/update_json/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(coordinatesData)
+                });
+
+                if (jsonUpdateResponse.ok) {
+                    alert("Coordinates and video URL saved successfully");
+                } else {
+                    alert("Failed to save coordinates and video URL");
+                }
+            } catch (error) {
+                console.error('There was an error:', error);
+            }
+        });
+
+    </script>
+</body>
+</html>

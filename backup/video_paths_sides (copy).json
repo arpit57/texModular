@@ -1,0 +1,17 @@
+{
+    "videos": [
+        "/home/arpit/Testing/texModular/videos/testVideo2.mp4",
+        "/home/arpit/Testing/texModular/videos/testVideo2.mp4"
+    ],
+    "pickup_coords": [
+        [[5, 10], [120, 140]],
+        [[5, 10], [120, 140]]
+    ],
+    "drop_coords": [
+        [[240, 60], [450, 190]],
+        [[240, 60], [450, 190]]
+    ],
+    "pickup_sides": [["right", "bottom"], ["right", "bottom"]],
+    "drop_sides": [["bottom"], ["bottom"]]
+}
+

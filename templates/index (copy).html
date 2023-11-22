@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draw Bounding Boxes on Video</title>
+    <style>
+        #canvas {
+            max-width: 100%;
+            border: 1px solid #000;
+        }
+
+        #button-container {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Draw Bounding Boxes on Video</h1>
+    <p id="statusText">Select bounding box for: <strong>Pickup</strong></p>
+    
+    <!-- Video Upload Input -->
+    <input type="file" id="videoUpload" name="videoUpload" accept="video/*">
+    <input type="text" id="videoUrl" placeholder="Enter video URL" />
+
+    <canvas id="canvas" width="640" height="480"></canvas>
+    <img id="videoStream" style="display:none;" alt="Video Stream"/>
+    <div id="button-container">
+        <button id="save">Save Coordinates</button>
+        <button id="pickup">Pickup</button>
+        <button id="drop">Drop</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+        const saveButton = document.getElementById('save');
+        const pickupButton = document.getElementById('pickup');
+        const dropButton = document.getElementById('drop');
+        const statusText = document.getElementById('statusText');
+        const video = document.getElementById('videoElement');
+        const videoUrlInput = document.getElementById('videoUrl');
+        const videoStream = document.getElementById('videoStream');
+
+        let isDrawing = false;
+        let startX = 0;
+        let startY = 0;
+        let endX = 0;
+        let endY = 0;
+        let currentBox = "pickup";
+        let pickupCoords = {};
+        let dropCoords = {};
+
+        // Function to load video frame onto canvas
+        function loadVideoFrame(videoSource) {
+            videoStream.src = videoSource; // Set the video source for the image tag
+            videoStream.onload = () => { // Once the image is loaded
+                context.drawImage(videoStream, 0, 0, canvas.width, canvas.height); // Draw it on the canvas
+                videoStream.style.display = 'none'; // Hide the image element
+            };
+            videoStream.onerror = () => {
+                console.error('The video failed to load.');
+            };
+        }
+
+        videoUrlInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const videoUrl = videoUrlInput.value;
+                loadVideoFrame(videoUrl); // Call this function when the Enter key is pressed
+            }
+        });
+
+        // Event listener for video file selection
+        document.getElementById('videoUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const url = URL.createObjectURL(file);
+                loadVideoFrame(url);
+            }
+        });
+
+        pickupButton.addEventListener('click', function() {
+            currentBox = "pickup";
+            statusText.innerHTML = "Select bounding box for: <strong>Pickup</strong>";
+        });
+
+        dropButton.addEventListener('click', function() {
+            currentBox = "drop";
+            statusText.innerHTML = "Select bounding box for: <strong>Drop</strong>";
+        });
+
+        canvas.addEventListener('mousedown', (e) => {
+        isDrawing = true;
+        [startX, startY] = [e.offsetX, e.offsetY];
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+        if (!isDrawing) return;
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(videoStream, 0, 0, canvas.width, canvas.height); // Redraw the frame
+        endX = e.offsetX;
+        endY = e.offsetY;
+        context.beginPath();
+        context.rect(startX, startY, endX - startX, endY - startY);
+        context.strokeStyle = 'red';
+        context.stroke();
+        });
+
+        canvas.addEventListener('mouseup', () => {
+        if (!isDrawing) return;
+        isDrawing = false;
+        if (currentBox === "pickup") {
+            pickupCoords = { startX, startY, endX, endY };
+        } else {
+            dropCoords = { startX, startY, endX, endY };
+        }
+        });
+
+        saveButton.addEventListener('click', async function() {
+            const videoFile = document.getElementById('videoUpload').files[0];
+            const videoUrl = document.getElementById('videoUrl').value;
+            
+            if (!videoFile && !videoUrl) {
+                alert("Please upload a video file or enter a video URL.");
+                return;
+            }
+
+            if (!pickupCoords.startX || !dropCoords.startX) {
+                alert("Please draw both Pickup and Drop bounding boxes before saving.");
+                return;
+            }
+
+            let videoPath = videoFile ? `/home/arpit/Testing/texModular/videos/${videoFile.name}` : videoUrl;
+
+            // Now send both the video path (or URL) and the coordinates to the backend
+            const coordinatesData = {
+                video_path: videoPath, // Send the video file path or the video URL
+                pickup_coords: [[pickupCoords.startX, pickupCoords.startY], [pickupCoords.endX, pickupCoords.endY]], 
+                drop_coords: [[dropCoords.startX, dropCoords.startY], [dropCoords.endX, dropCoords.endY]]
+            };
+
+            try {
+                let jsonUpdateResponse = await fetch('/update_json/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(coordinatesData)
+                });
+
+                if (jsonUpdateResponse.ok) {
+                    alert("Coordinates and video URL saved successfully");
+                } else {
+                    alert("Failed to save coordinates and video URL");
+                }
+            } catch (error) {
+                console.error('There was an error:', error);
+            }
+        });
+
+    </script>
+</body>
+</html>

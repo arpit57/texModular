@@ -1,0 +1,42 @@
+{
+    "videos": [
+        
+        "http://192.168.1.4:8080/video"
+    ],
+    "pickup_coords": [
+        [
+            [
+                90,
+                52
+            ],
+            [
+                228,
+                162
+            ]
+        ]
+    ],
+    "drop_coords": [
+        [
+            [
+                380,
+                83
+            ],
+            [
+                573,
+                245
+            ]
+        ]
+    ],
+    "pickup_sides": [
+        [
+            "left",
+            "bottom"
+        ]
+    ],
+    "drop_sides": [
+        [
+            "left",
+            "top"
+        ]
+    ]
+}

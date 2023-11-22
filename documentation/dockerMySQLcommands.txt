@@ -1,0 +1,29 @@
+docker pull mysql:8.0
+
+docker run --name texDB -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -d mysql:8.0
+
+docker exec -it texDB mysql -u root -p
+
+   create database tex;
+   use tex;
+   CREATE TABLE video_data (
+    `current_date` DATE NOT NULL,
+    `current_time` TIME NOT NULL,
+    video_index INT NOT NULL,
+    cycle_count INT NOT NULL,
+    cycle_time FLOAT NOT NULL
+);
+
+   GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
+   FLUSH PRIVILEGES;
+   exit;
+
+docker restart texDB;
+
+
+github access token: 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
+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
+
+
+
+
