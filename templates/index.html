@@ -42,6 +42,12 @@
         <button class="edge-button" data-edge="top">Top</button>
     </div>
 
+    <div id="existing-paths">
+        <h2>Existing Paths and URLs</h2>
+        <select id="pathsList" multiple></select>
+        <button id="remove">Remove Selected</button>
+    </div>
+
     <script>
         let pickupEdges = []; // Initialize empty array for pickup sides
         let dropEdges = []; // Initialize empty array for drop sides
@@ -174,6 +180,48 @@
                 loadVideoFrameFromFile(url);
             }
         });
+
+        function populatePathsList() {
+            const pathsList = document.getElementById('pathsList');
+            pathsList.innerHTML = ''; // Clear existing options
+            // Fetch the existing paths from the server and add them as options
+            fetch('/get_paths/')
+                .then(response => response.json())
+                .then(data => {
+                    data.videos.forEach((path, index) => {
+                        const option = document.createElement('option');
+                        option.value = index; // Index as value to identify the video
+                        option.textContent = path;
+                        pathsList.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error fetching paths:', error));
+        }
+
+        document.getElementById('remove').addEventListener('click', async function() {
+            const selectedOptions = Array.from(document.getElementById('pathsList').selectedOptions).map(option => parseInt(option.value));
+            if (selectedOptions.length === 0) {
+                alert("Please select at least one path or URL to remove.");
+                return;
+            }
+            try {
+                let removeResponse = await fetch('/remove_paths/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ indices: selectedOptions })
+                });
+                if (removeResponse.ok) {
+                    alert("Removed successfully");
+                    populatePathsList(); // Refresh the list
+                } else {
+                    alert("Failed to remove the selected paths");
+                }
+            } catch (error) {
+                console.error('There was an error:', error);
+            }
+        });
         
         videoElement.addEventListener('loadeddata', () => {
             drawOnCanvas(); // Draw the current frame onto the canvas
@@ -277,6 +325,8 @@
                 console.error('There was an error:', error);
             }
         });
+
+        populatePathsList();
 
     </script>
 </body>

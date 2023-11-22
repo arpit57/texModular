@@ -1,40 +1,156 @@
 {
     "videos": [
-        "http://192.168.1.4:8080/video"
+        "/home/arpit/Testing/texModular/videos/testVideo2.mp4",
+        "/home/arpit/Testing/texModular/videos/testVideo2.mp4",
+        "/home/arpit/Testing/texModular/videos/testVideo2.mp4",
+        "/home/arpit/Testing/texModular/videos/testVideo2.mp4",
+        "/home/arpit/Testing/texModular/videos/testVideo2.mp4"
     ],
     "pickup_coords": [
         [
             [
-                3,
-                4
+                2,
+                8
             ],
             [
-                141,
-                155
+                88,
+                143
+            ]
+        ],
+        [
+            [
+                2,
+                8
+            ],
+            [
+                88,
+                143
+            ]
+        ],
+        [
+            [
+                2,
+                8
+            ],
+            [
+                88,
+                143
+            ]
+        ],
+        [
+            [
+                2,
+                8
+            ],
+            [
+                88,
+                143
+            ]
+        ],
+        [
+            [
+                2,
+                8
+            ],
+            [
+                88,
+                143
             ]
         ]
     ],
     "drop_coords": [
         [
             [
-                423,
-                4
+                187,
+                47
             ],
             [
-                634,
-                150
+                347,
+                190
+            ]
+        ],
+        [
+            [
+                187,
+                47
+            ],
+            [
+                347,
+                190
+            ]
+        ],
+        [
+            [
+                187,
+                47
+            ],
+            [
+                347,
+                190
+            ]
+        ],
+        [
+            [
+                187,
+                47
+            ],
+            [
+                347,
+                190
+            ]
+        ],
+        [
+            [
+                187,
+                47
+            ],
+            [
+                347,
+                190
             ]
         ]
     ],
     "pickup_sides": [
         [
             "left",
-            "top"
+            "right"
+        ],
+        [
+            "left",
+            "right"
+        ],
+        [
+            "left",
+            "right"
+        ],
+        [
+            "left",
+            "right"
+        ],
+        [
+            "left",
+            "right"
         ]
     ],
     "drop_sides": [
         [
-            "right",
+            "bottom",
+            "top"
+        ],
+        [
+            "bottom",
+            "top"
+        ],
+        [
+            "bottom",
+            "top"
+        ],
+        [
+            "bottom",
+            "top"
+        ],
+        [
+            "bottom",
             "top"
         ]
     ]
