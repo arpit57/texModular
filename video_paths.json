@@ -4,7 +4,11 @@
         "/home/arpit/Testing/texModular/videos/testVideo2.mp4",
         "/home/arpit/Testing/texModular/videos/testVideo2.mp4",
         "/home/arpit/Testing/texModular/videos/testVideo2.mp4",
-        "/home/arpit/Testing/texModular/videos/testVideo2.mp4"
+        "http://192.168.1.4:8080/video",
+        "http://192.168.1.4:8080/video",
+        "http://192.168.1.4:8080/video",
+        "/home/arpit/Testing/texModular/videos/testVideo2.mp4",
+        "http://192.168.1.4:8080/video"
     ],
     "pickup_coords": [
         [
@@ -49,12 +53,52 @@
         ],
         [
             [
-                2,
-                8
+                14,
+                13
             ],
             [
-                88,
-                143
+                178,
+                158
+            ]
+        ],
+        [
+            [
+                30,
+                42
+            ],
+            [
+                180,
+                219
+            ]
+        ],
+        [
+            [
+                13,
+                14
+            ],
+            [
+                171,
+                36
+            ]
+        ],
+        [
+            [
+                4,
+                12
+            ],
+            [
+                95,
+                146
+            ]
+        ],
+        [
+            [
+                25,
+                24
+            ],
+            [
+                217,
+                225
             ]
         ]
     ],
@@ -101,12 +145,52 @@
         ],
         [
             [
-                187,
-                47
+                395,
+                12
             ],
             [
-                347,
-                190
+                610,
+                177
+            ]
+        ],
+        [
+            [
+                455,
+                35
+            ],
+            [
+                640,
+                229
+            ]
+        ],
+        [
+            [
+                611,
+                37
+            ],
+            [
+                364,
+                225
+            ]
+        ],
+        [
+            [
+                192,
+                46
+            ],
+            [
+                341,
+                193
+            ]
+        ],
+        [
+            [
+                420,
+                65
+            ],
+            [
+                614,
+                246
             ]
         ]
     ],
@@ -122,6 +206,22 @@
         [
             "left",
             "right"
+        ],
+        [
+            "left",
+            "right"
+        ],
+        [
+            "right",
+            "bottom"
+        ],
+        [
+            "left",
+            "right"
+        ],
+        [
+            "right",
+            "top"
         ],
         [
             "left",
@@ -150,8 +250,23 @@
             "top"
         ],
         [
+            "left",
+            "top"
+        ],
+        [
             "bottom",
             "top"
+        ],
+        [
+            "left",
+            "top"
+        ],
+        [
+            "bottom",
+            "top"
+        ],
+        [
+            "bottom"
         ]
     ]
 }

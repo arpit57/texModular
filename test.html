@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Live Video Stream to Canvas</title>
+    <style>
+        canvas {
+            border: 1px solid #000;
+        }
+    </style>
+    <script>
+        function loadVideo() {
+            var url = document.getElementById('videoUrl').value;
+
+            // Update the src attribute of the img tag to the entered URL
+            document.getElementById('videoStream').src = url;
+
+            // Draw the image onto the canvas once it starts loading
+            document.getElementById('videoStream').onload = function() {
+                drawToCanvas(this);
+            };
+        }
+
+        function drawToCanvas(videoElement) {
+            var canvas = document.getElementById('canvas');
+            var context = canvas.getContext('2d');
+            
+            // Set canvas size to match the video stream size
+            canvas.width = videoElement.width;
+            canvas.height = videoElement.height;
+
+            // Continuously draw the video frame to the canvas
+            function drawFrame() {
+                context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+                requestAnimationFrame(drawFrame);
+            }
+
+            drawFrame();
+        }
+    </script>
+</head>
+<body>
+    <h2>Live Video Stream to Canvas</h2>
+    <input type="text" id="videoUrl" placeholder="Enter video stream URL">
+    <button onclick="loadVideo()">Load Video</button>
+    <br><br>
+    <img id="videoStream" style="display:none;">
+    <canvas id="canvas"></canvas>
+</body>
+</html>

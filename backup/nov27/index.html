@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Draw Bounding Boxes on Video</title>
     <style>
-        #videoStream {
-            display: none; /* Hidden by default */
-        }
         #canvas {
             max-width: 100%;
             border: 1px solid #000;
@@ -78,9 +75,9 @@
         // Function to handle drawing on the canvas
         function drawOnCanvas() {
             context.clearRect(0, 0, canvas.width, canvas.height);
-            if (videoElement.src) {
+            if (videoElement.style.display !== 'none') {
                 context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-            } else if (videoStream.src) {
+            } else if (videoStream.style.display !== 'none') {
                 context.drawImage(videoStream, 0, 0, canvas.width, canvas.height);
             }
         }
@@ -95,19 +92,19 @@
         }
 
         function loadVideoFrameFromURL(videoSource) {
-            console.log('Loading video from URL:', videoSource);
-            videoStream.src = videoSource;
-            videoStream.style.display = 'none'; // Make the image visible
-
-            videoStream.onload = () => {
-                console.log('Video stream loaded');
-                drawOnCanvas();
-            };
-
-            videoStream.onerror = () => {
-                console.error('The video stream failed to load.');
-                videoStream.style.display = 'none';
-            };
+        videoElement.src = videoSource;
+        videoElement.style.display = 'block'; // Make sure videoElement is visible for drawing
+        videoElement.load();
+        videoElement.addEventListener('loadedmetadata', () => {
+        videoElement.currentTime = 0.1; // Seek to the first frame
+        }, { once: true });
+        videoElement.addEventListener('loadeddata', () => {
+            drawOnCanvas(); // Draw the current frame onto the canvas
+            videoElement.style.display = 'none'; // Hide the video element if you don't want it to be visible
+        }, { once: true });
+        videoElement.addEventListener('error', () => {
+            console.error('The video failed to load.');
+        });
         }
 
         videoUrlInput.addEventListener('keypress', function(e) {
@@ -115,7 +112,13 @@
                 e.preventDefault();
                 const videoUrl = videoUrlInput.value.trim();
                 if (videoUrl) {
-                    loadVideoFrameFromURL(videoUrl);
+                    // If you want to hide the video element, uncomment the following line
+                    // videoElement.style.display = 'none'; 
+                    videoElement.src = videoUrl;
+                    videoElement.load();
+                    videoElement.addEventListener('loadedmetadata', () => {
+                        videoElement.currentTime = 0.1; // Attempt to seek to the first frame
+                    }, { once: true }); // Use once: true to avoid multiple event attachments
                 } else {
                     alert('Please enter a valid video URL.');
                 }
