@@ -20,9 +20,24 @@ app = FastAPI()
 
 templates = Jinja2Templates(directory=".")
 
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
 def read_root():
-    return {"Hello": "World"}
+    html_content = """
+    <html>
+        <head>
+            <title>TEX test</title>
+        </head>
+        <body>
+            <h1>TEX test</h1>
+            <p>Choose an option:</p>
+            <ul>
+                <li><a href="/addVideo/">Update video list</a></li>
+                <li><a href="/video/">View Video Feed</a></li>
+            </ul>
+        </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content)
 
 # Directory for storing videos
 # app.mount("/static", StaticFiles(directory="static"), name="static")
