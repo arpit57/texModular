@@ -1,104 +1,27 @@
 {
     "videos": [
         "/home/arpit/Testing/texModular/videos/testVideo2.mp4",
-        "/home/arpit/Testing/texModular/videos/testVideo2.mp4",
-        "/home/arpit/Testing/texModular/videos/testVideo2.mp4",
-        "/home/arpit/Testing/texModular/videos/testVideo2.mp4",
-        "http://192.168.1.4:8080/video",
-        "http://192.168.1.4:8080/video",
-        "http://192.168.1.4:8080/video",
-        "/home/arpit/Testing/texModular/videos/testVideo2.mp4",
-        "http://192.168.1.4:8080/video"
+        "/home/arpit/Testing/texModular/videos/testVideo2.mp4"
     ],
     "pickup_coords": [
         [
             [
                 2,
-                8
+                0
             ],
             [
-                88,
-                143
-            ]
-        ],
-        [
-            [
-                2,
-                8
-            ],
-            [
-                88,
-                143
-            ]
-        ],
-        [
-            [
-                2,
-                8
-            ],
-            [
-                88,
-                143
-            ]
-        ],
-        [
-            [
-                2,
-                8
-            ],
-            [
-                88,
-                143
-            ]
-        ],
-        [
-            [
-                14,
-                13
-            ],
-            [
-                178,
-                158
-            ]
-        ],
-        [
-            [
-                30,
-                42
-            ],
-            [
-                180,
-                219
-            ]
-        ],
-        [
-            [
-                13,
-                14
-            ],
-            [
-                171,
-                36
+                96,
+                162
             ]
         ],
         [
             [
                 4,
-                12
+                9
             ],
             [
-                95,
-                146
-            ]
-        ],
-        [
-            [
-                25,
-                24
-            ],
-            [
-                217,
-                225
+                136,
+                150
             ]
         ]
     ],
@@ -106,166 +29,41 @@
         [
             [
                 187,
-                47
+                44
             ],
             [
-                347,
-                190
+                340,
+                203
             ]
         ],
         [
             [
-                187,
-                47
+                246,
+                42
             ],
             [
-                347,
-                190
-            ]
-        ],
-        [
-            [
-                187,
-                47
-            ],
-            [
-                347,
-                190
-            ]
-        ],
-        [
-            [
-                187,
-                47
-            ],
-            [
-                347,
-                190
-            ]
-        ],
-        [
-            [
-                395,
-                12
-            ],
-            [
-                610,
-                177
-            ]
-        ],
-        [
-            [
-                455,
-                35
-            ],
-            [
-                640,
-                229
-            ]
-        ],
-        [
-            [
-                611,
-                37
-            ],
-            [
-                364,
-                225
-            ]
-        ],
-        [
-            [
-                192,
-                46
-            ],
-            [
-                341,
-                193
-            ]
-        ],
-        [
-            [
-                420,
-                65
-            ],
-            [
-                614,
-                246
+                457,
+                195
             ]
         ]
     ],
     "pickup_sides": [
         [
-            "left",
-            "right"
-        ],
-        [
-            "left",
-            "right"
-        ],
-        [
-            "left",
-            "right"
-        ],
-        [
-            "left",
-            "right"
-        ],
-        [
             "right",
             "bottom"
         ],
         [
-            "left",
-            "right"
-        ],
-        [
             "right",
-            "top"
-        ],
-        [
-            "left",
-            "right"
-        ],
-        [
-            "left",
-            "right"
+            "bottom"
         ]
     ],
     "drop_sides": [
         [
-            "bottom",
-            "top"
-        ],
-        [
-            "bottom",
-            "top"
-        ],
-        [
-            "bottom",
-            "top"
-        ],
-        [
-            "bottom",
-            "top"
+            "left",
+            "bottom"
         ],
         [
             "left",
-            "top"
-        ],
-        [
-            "bottom",
-            "top"
-        ],
-        [
-            "left",
-            "top"
-        ],
-        [
-            "bottom",
-            "top"
-        ],
-        [
             "bottom"
         ]
     ]

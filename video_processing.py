@@ -1,5 +1,5 @@
 import cv2
-from time import time
+import time
 from datetime import datetime
 from ultralytics import YOLO
 from utilities import is_inside, draw_detections_on_frame, is_entering_from_side, draw_sides
@@ -30,11 +30,14 @@ def process_video(video_url, pickup_coords, drop_coords, pickup_sides, drop_side
     last_time = None
     cycle_time = 0.0
 
+    start_time = time.time()
+
     try:
         while True:
             ret, frame = cap.read()
             if not ret:
-                print("Stream ended.")
+                end_time = time.time()  # Record end time when stream ends
+                print(f"Stream ended. Total processing time: {end_time - start_time:.2f} seconds.")
                 break
 
             if frame_count % (original_fps // 5) == 0:  # limiting to 5 fps
@@ -62,7 +65,7 @@ def process_video(video_url, pickup_coords, drop_coords, pickup_sides, drop_side
 
 
                 if last_count != count:
-                    recent_time = time()  # Record the current time
+                    recent_time = time.time()  # Record the current time
 
                     if last_time is not None:
                         cycle_time = recent_time - last_time  # Calculate the cycle time

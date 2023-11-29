@@ -15,7 +15,6 @@ from pathlib import Path
 # from typing import List, Dict, Any
 import logging
 
-
 app = FastAPI()
 
 templates = Jinja2Templates(directory=".")
