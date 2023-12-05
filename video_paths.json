@@ -1,70 +1,40 @@
 {
     "videos": [
-        "/home/arpit/Testing/texModular/videos/testVideo2.mp4",
-        "/home/arpit/Testing/texModular/videos/testVideo2.mp4"
+        "http://192.168.1.9:8080/video"
     ],
     "pickup_coords": [
         [
             [
-                2,
-                0
+                18,
+                15
             ],
             [
-                96,
-                162
-            ]
-        ],
-        [
-            [
-                4,
-                9
-            ],
-            [
-                136,
-                150
+                246,
+                144
             ]
         ]
     ],
     "drop_coords": [
         [
             [
-                187,
-                44
+                551,
+                17
             ],
             [
-                340,
-                203
-            ]
-        ],
-        [
-            [
-                246,
-                42
-            ],
-            [
-                457,
-                195
+                826,
+                159
             ]
         ]
     ],
     "pickup_sides": [
         [
-            "right",
-            "bottom"
-        ],
-        [
-            "right",
-            "bottom"
+            "left"
         ]
     ],
     "drop_sides": [
         [
-            "left",
-            "bottom"
-        ],
-        [
-            "left",
-            "bottom"
+            "right",
+            "top"
         ]
     ]
 }

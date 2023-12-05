@@ -160,8 +160,6 @@ async def stream_videos():
         all_pickup_sides = data.get("pickup_sides")  
         all_drop_sides = data.get("drop_sides")      
 
-
-
     grid_height, grid_width = calculate_grid_dimensions(len(video_urls))
 
     out_frames_list = [[] for _ in video_urls]
