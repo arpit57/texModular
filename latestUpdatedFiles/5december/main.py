@@ -12,15 +12,31 @@ from video_processing import process_video
 from time import sleep
 import json
 from pathlib import Path
-
+# from typing import List, Dict, Any
+import logging
 
 app = FastAPI()
 
 templates = Jinja2Templates(directory=".")
 
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
 def read_root():
-    return {"Hello": "World"}
+    html_content = """
+    <html>
+        <head>
+            <title>TEX test</title>
+        </head>
+        <body>
+            <h1>TEX test</h1>
+            <p>Choose an option:</p>
+            <ul>
+                <li><a href="/addVideo/">Update video list</a></li>
+                <li><a href="/video/">View Video Feed</a></li>
+            </ul>
+        </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content)
 
 # Directory for storing videos
 # app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -28,6 +44,12 @@ def read_root():
 @app.get("/addVideo/", response_class=HTMLResponse)
 async def read_root(request: Request):
     return templates.TemplateResponse("templates/index.html", {"request": request})
+
+@app.get("/get_paths/")
+async def get_paths():
+    with open('video_paths.json', 'r') as file:
+        data = json.load(file)
+        return {"videos": data['videos']}
 
 @app.post("/addVideo")
 async def add_video(request: Request, file: UploadFile = File(None)):
@@ -89,6 +111,40 @@ async def update_json(request: Request):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/remove_paths/")
+async def remove_paths(request: Request):
+    try:
+        body = await request.json()
+        indices = body.get('indices')
+
+        if not isinstance(indices, list) or not all(isinstance(index, int) for index in indices):
+            raise ValueError("Indices must be a list of integers.")
+
+        with open('video_paths.json', 'r+') as file:
+            data = json.load(file)
+            indices.sort(reverse=True)  # Sort indices in descending order
+            for index in indices:
+                if index < 0 or index >= len(data['videos']):
+                    raise IndexError("Index out of range.")
+                # Remove elements by index from each list
+                del data['videos'][index]
+                del data['pickup_coords'][index]
+                del data['drop_coords'][index]
+                del data['pickup_sides'][index]
+                del data['drop_sides'][index]
+
+            file.seek(0)  # Reset file pointer to the beginning of the file
+            json.dump(data, file, indent=4)
+            file.truncate()  # Remove the rest of the original data
+
+        return {"message": "Removed successfully"}
+    except ValueError:
+        raise HTTPException(status_code=422, detail="Indices must be a list of integers.")
+    except IndexError:
+        raise HTTPException(status_code=422, detail="Index out of range.")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.get("/video/")
 async def video_feed():
@@ -103,8 +159,6 @@ async def stream_videos():
         all_drop_coords = [tuple(map(tuple, coords)) for coords in data.get("drop_coords")]
         all_pickup_sides = data.get("pickup_sides")  
         all_drop_sides = data.get("drop_sides")      
-
-
 
     grid_height, grid_width = calculate_grid_dimensions(len(video_urls))
 

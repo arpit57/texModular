@@ -1,40 +1,40 @@
 {
     "videos": [
-        "http://192.168.1.9:8080/video"
+        "/home/arpit/Testing/texModular/videos/t3_resized.mp4"
     ],
     "pickup_coords": [
         [
             [
-                18,
-                15
+                235,
+                204
             ],
             [
-                246,
-                144
+                394,
+                327
             ]
         ]
     ],
     "drop_coords": [
         [
             [
-                551,
-                17
+                404,
+                130
             ],
             [
-                826,
-                159
+                602,
+                245
             ]
         ]
     ],
     "pickup_sides": [
         [
-            "left"
+            "right",
+            "bottom"
         ]
     ],
     "drop_sides": [
         [
-            "right",
-            "top"
+            "bottom"
         ]
     ]
 }

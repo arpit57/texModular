@@ -17,7 +17,7 @@ def process_video(video_url, pickup_coords, drop_coords, pickup_sides, drop_side
     if not cap.isOpened():
         raise ValueError(f"Couldn't open video stream from URL: {video_url}")
 
-    width = 854
+    width = 852
     height = 480
     original_fps = int(cap.get(cv2.CAP_PROP_FPS))
 
@@ -40,7 +40,7 @@ def process_video(video_url, pickup_coords, drop_coords, pickup_sides, drop_side
                 print(f"Stream ended. Total processing time: {end_time - start_time:.2f} seconds.")
                 break
             
-            frame = cv2.resize(frame, (854, 480))
+            frame = cv2.resize(frame, (852, 480))
 
             if frame_count % (original_fps // 5) == 0:  # limiting to 5 fps
                 results = model(frame, conf=0.05, iou=0.5)
