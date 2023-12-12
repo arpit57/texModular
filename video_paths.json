@@ -1,40 +1,102 @@
 {
     "videos": [
-        "/home/arpit/Testing/texModular/videos/t3_resized.mp4"
+        "/home/arpit/Testing/texModular/videos/t3_resized2.mp4",
+        "/home/arpit/Testing/texModular/videos/testVideo2.mp4"
     ],
     "pickup_coords": [
         [
             [
-                235,
-                204
+                292,
+                353
             ],
             [
-                394,
-                327
+                409,
+                302
+            ],
+            [
+                343,
+                210
+            ],
+            [
+                249,
+                240
+            ]
+        ],
+        [
+            [
+                9,
+                12
+            ],
+            [
+                143,
+                5
+            ],
+            [
+                74,
+                131
+            ],
+            [
+                3,
+                128
             ]
         ]
     ],
     "drop_coords": [
         [
             [
-                404,
-                130
+                464,
+                273
             ],
             [
-                602,
-                245
+                579,
+                223
+            ],
+            [
+                474,
+                98
+            ],
+            [
+                362,
+                142
+            ]
+        ],
+        [
+            [
+                252,
+                47
+            ],
+            [
+                458,
+                54
+            ],
+            [
+                456,
+                193
+            ],
+            [
+                219,
+                175
             ]
         ]
     ],
     "pickup_sides": [
         [
-            "right",
-            "bottom"
+            0,
+            1
+        ],
+        [
+            0,
+            1
         ]
     ],
     "drop_sides": [
         [
-            "bottom"
+            1,
+            2
+        ],
+        [
+            1,
+            2
         ]
     ]
 }

@@ -67,13 +67,9 @@
         const videoElement = document.getElementById('videoElement');
 
         let isDrawing = false;
-        let startX = 0;
-        let startY = 0;
-        let endX = 0;
-        let endY = 0;
         let currentBox = "pickup";
-        let pickupCoords = {};
-        let dropCoords = {};
+        let pickupCoords = [];
+        let dropCoords = [];
 
         // Function to handle drawing on the canvas
         function drawOnCanvas() {
@@ -125,15 +121,26 @@
 
         // This function redraws the frame on the canvas, keeping the last drawn image intact
         function redrawCanvas() {
-            // Only clear the canvas if there is no drawing in progress
-            if (!isDrawing) {
-                context.clearRect(0, 0, canvas.width, canvas.height);
-            }
-            // Always draw the frame from the video or image source
+            context.clearRect(0, 0, canvas.width, canvas.height);
             if (videoElement.src) {
                 context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
             } else if (videoStream.src) {
                 context.drawImage(videoStream, 0, 0, canvas.width, canvas.height);
+            }
+            drawPolygon(pickupCoords, 'blue'); // Draw the pickup polygon
+            drawPolygon(dropCoords, 'red'); // Draw the drop polygon
+        }
+
+        function drawPolygon(coordsArray, strokeStyle) {
+            if (coordsArray.length > 1) {
+                context.beginPath();
+                context.moveTo(coordsArray[0][0], coordsArray[0][1]);
+                coordsArray.forEach(coord => {
+                    context.lineTo(coord[0], coord[1]);
+                });
+                context.closePath();
+                context.strokeStyle = strokeStyle;
+                context.stroke();
             }
         }
 
@@ -194,6 +201,26 @@
                 })
                 .catch(error => console.error('Error fetching paths:', error));
         }
+        
+        function drawTemporaryLine(coordsArray, currentPoint) {
+            // Draw lines for the polygon
+            if (coordsArray.length > 0) {
+                context.beginPath();
+                context.moveTo(coordsArray[0][0], coordsArray[0][1]);
+                coordsArray.forEach(coord => {
+                    context.lineTo(coord[0], coord[1]);
+                });
+                context.lineTo(currentPoint[0], currentPoint[1]);
+                context.strokeStyle = 'red';
+                context.stroke();
+            }
+        }
+
+        function updateSelectedCoordsText() {
+            const selectedCoordsText = `Selected Coordinates: Pickup (${pickupCoords.map(coord => coord.join(', ')).join(' | ')}) Drop (${dropCoords.map(coord => coord.join(', ')).join(' | ')})`;
+            document.getElementById('selectedCoords').innerText = selectedCoordsText;
+        }
+
 
         document.getElementById('remove').addEventListener('click', async function() {
             const selectedOptions = Array.from(document.getElementById('pathsList').selectedOptions).map(option => parseInt(option.value));
@@ -251,33 +278,34 @@
         });
 
         canvas.addEventListener('mousedown', (e) => {
-        isDrawing = true;
-        [startX, startY] = [e.offsetX, e.offsetY];
+            const point = [e.offsetX, e.offsetY];
+            if (currentBox === "pickup") {
+                pickupCoords.push(point);
+            } else {
+                dropCoords.push(point);
+            }
+            updateSelectedCoordsText(); // Update the coordinates text
+            redrawCanvas();
         });
 
         canvas.addEventListener('mousemove', (e) => {
-            if (!isDrawing) return;
+            // Redrawing logic for a polygon
+            if (!isDrawing || (currentBox === "pickup" && pickupCoords.length < 1) || (currentBox === "drop" && dropCoords.length < 1)) return;
             redrawCanvas();
-            endX = e.offsetX;
-            endY = e.offsetY;
-            context.beginPath();
-            context.rect(startX, startY, endX - startX, endY - startY);
-            context.strokeStyle = 'red';
-            context.stroke();
+            const point = [e.offsetX, e.offsetY];
+            drawTemporaryLine(currentBox === "pickup" ? pickupCoords : dropCoords, point);
         });
 
         canvas.addEventListener('mouseup', () => {
-        if (!isDrawing) return;
-        isDrawing = false;
-        if (currentBox === "pickup") {
-            pickupCoords = { startX, startY, endX, endY };
-        } else {
-            dropCoords = { startX, startY, endX, endY };
-        }
-        const selectedCoordsText = `Selected Coordinates: ${currentBox.charAt(0).toUpperCase() + currentBox.slice(1)} (${startX}, ${startY}) to (${endX}, ${endY})`;
-        document.getElementById('selectedCoords').innerText = selectedCoordsText;
-        redrawCanvas();
+            isDrawing = false;
+            redrawCanvas();
         });
+        
+
+        const sideMapping = { 'right': 0, 'bottom': 1, 'left': 2, 'top': 3 };
+        function convertSidesToNumbers(sidesArray) {
+            return sidesArray.map(side => sideMapping[side]);
+        }
 
         saveButton.addEventListener('click', async function() {
             const videoFile = document.getElementById('videoUpload').files[0];
@@ -288,20 +316,20 @@
                 return;
             }
 
-            if (!pickupCoords.startX || !dropCoords.startX) {
-                alert("Please draw both Pickup and Drop bounding boxes before saving.");
+            if (pickupCoords.length < 4 || dropCoords.length < 4) {
+                alert("Please draw both Pickup and Drop polygons with at least 4 points each before saving.");
                 return;
             }
 
             let videoPath = videoFile ? `/home/arpit/Testing/texModular/videos/${videoFile.name}` : videoUrl;
 
-            // Now send both the video path (or URL) and the coordinates to the backend
+            
             const coordinatesData = {
-                video_path: videoPath, // Send the video file path or the video URL
-                pickup_coords: [[pickupCoords.startX, pickupCoords.startY], [pickupCoords.endX, pickupCoords.endY]], 
-                drop_coords: [[dropCoords.startX, dropCoords.startY], [dropCoords.endX, dropCoords.endY]],
-                pickup_sides: pickupEdges,
-                drop_sides: dropEdges
+                video_path: videoPath, 
+                pickup_coords: pickupCoords, 
+                drop_coords: dropCoords,
+                pickup_sides: convertSidesToNumbers(pickupEdges),
+                drop_sides: convertSidesToNumbers(dropEdges)
             };
 
             try {

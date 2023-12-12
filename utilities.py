@@ -1,12 +1,14 @@
 import math
 import cv2
 import numpy as np
+from shapely.geometry import Point, Polygon, LineString
 
-def is_inside(box, rect):
-    x1, y1, x2, y2 = box
-    center_x = (x1 + x2) / 2
-    center_y = (y1 + y2) / 2
-    return rect[0][0] <= center_x <= rect[1][0] and rect[0][1] <= center_y <= rect[1][1]
+
+def is_inside(point, polygon):
+    """Check if the point (x, y) is inside the given polygon."""
+    shapely_point = Point(point)
+    shapely_polygon = Polygon(polygon)
+    return shapely_polygon.contains(shapely_point)
 
 def calculate_grid_dimensions(total_videos):
     # Calculate the width based on the 2:3 ratio
@@ -33,18 +35,41 @@ def draw_detections_on_frame(frame, box_data, names):
     cv2.putText(frame, label, (c1[0], c1[1] - 2), 0, tf / 3, [225, 255, 255], thickness=tf, lineType=cv2.LINE_AA)
     return frame
 
-def draw_sides(frame, region, sides, color):
-    x_start, y_start, x_end, y_end = region[0][0], region[0][1], region[1][0], region[1][1]
+def draw_sides(frame, polygon, side_indices, color):
+    """Draw the indicated sides of the polygon on the frame."""
     thickness = 2
+    sorted_polygon = get_sorted_polygon_vertices(polygon)
+    n = len(sorted_polygon)
+    for index in side_indices:
+        # Convert side numbers assuming 1-based index from user input to 0-based index for programming
+        adjusted_index = index - 1
+        start_vertex = tuple(sorted_polygon[adjusted_index % n])
+        end_vertex = tuple(sorted_polygon[(adjusted_index + 1) % n])
+        cv2.line(frame, start_vertex, end_vertex, color, thickness)
 
-    if 'left' in sides:
-        cv2.line(frame, (x_start, y_start), (x_start, y_end), color, thickness)
-    if 'right' in sides:
-        cv2.line(frame, (x_end, y_start), (x_end, y_end), color, thickness)
-    if 'top' in sides:
-        cv2.line(frame, (x_start, y_start), (x_end, y_start), color, thickness)
-    if 'bottom' in sides:
-        cv2.line(frame, (x_start, y_end), (x_end, y_end), color, thickness)
+def get_sorted_polygon_vertices(polygon):
+    # Find the vertex with the highest y-value (and the leftmost in case of ties)
+    high_point = max(polygon, key=lambda point: (point[1], -point[0]))
+    high_index = polygon.index(high_point)
+
+    # Shift the polygon vertices list so that the highest point is the first
+    shifted_polygon = polygon[high_index:] + polygon[:high_index]
+
+    # Find the centroid
+    centroid = Polygon(shifted_polygon).centroid.coords[0]
+
+    # Sort the vertices in clockwise order starting from the highest point
+    def sort_key(point):
+        # Calculate the angle of each point relative to the centroid
+        angle = np.arctan2(point[1] - centroid[1], point[0] - centroid[0])
+        # Normalize the angle to be in the range [0, 2*pi]
+        normalized_angle = (angle + 2 * np.pi) % (2 * np.pi)
+        return normalized_angle
+
+    # We sort the vertices according to their angle in clockwise direction
+    sorted_vertices = sorted(shifted_polygon, key=sort_key)
+
+    return sorted_vertices
 
 def point_line_distance(point, line_start, line_end):
     """Calculate the minimum distance from a point to a line segment."""
@@ -65,19 +90,16 @@ def point_line_distance(point, line_start, line_end):
     # Return the distance from the point to the closest point on the line
     return np.linalg.norm(closest_point - np.array(point))
 
-def is_entering_from_side(box, region, sides, threshold=50):
-    """Check if the center of a bounding box is within a threshold distance of a specified side of a region."""
-    x_center, y_center = (box[0] + box[2]) / 2, (box[1] + box[3]) / 2
-    
-    side_centers = {
-        'left': ((region[0][0], region[0][1]), (region[0][0], region[1][1])),
-        'right': ((region[1][0], region[0][1]), (region[1][0], region[1][1])),
-        'top': ((region[0][0], region[0][1]), (region[1][0], region[0][1])),
-        'bottom': ((region[0][0], region[1][1]), (region[1][0], region[1][1]))
-    }
-    
-    for side in sides:
-        line_start, line_end = side_centers[side]
-        if point_line_distance((x_center, y_center), line_start, line_end) < threshold:
+
+def is_entering_from_side(point, polygon, side_numbers, threshold=50):
+    """Check if the point is within a threshold distance of any indicated polygon side."""
+    shapely_point = Point(point)
+    sorted_polygon = get_sorted_polygon_vertices(polygon)
+    for side_number in side_numbers:
+        # Convert the side number to index in the sorted polygon vertex list
+        line_start = sorted_polygon[side_number % len(sorted_polygon)]
+        line_end = sorted_polygon[(side_number + 1) % len(sorted_polygon)]
+        line = LineString([line_start, line_end])
+        if shapely_point.distance(line) < threshold:
             return True
     return False

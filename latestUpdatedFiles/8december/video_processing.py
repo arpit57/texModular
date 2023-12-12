@@ -5,7 +5,6 @@ from ultralytics import YOLO
 from utilities import is_inside, draw_detections_on_frame, is_entering_from_side, draw_sides
 from db_config import get_db_connection
 import onnxruntime
-import numpy as np
 
 model = YOLO('handDetection.pt')
 
@@ -44,24 +43,13 @@ def process_video(video_url, pickup_coords, drop_coords, pickup_sides, drop_side
             frame = cv2.resize(frame, (854, 480))
 
             if frame_count % (original_fps // 5) == 0:  # limiting to 5 fps
-                results = model(frame, conf=0.5, iou=0.5)
+                results = model(frame, conf=0.05, iou=0.5)
                 hands_in_frame = [list(map(int, box_data[:4])) for box_data in results[0].boxes.data.cpu().numpy() if len(box_data) >= 4]
 
-                hand_detected_in_pickup = False
-                hand_detected_in_drop = False
-                entering_pickup = False
-                entering_drop = False
-                for hand in hands_in_frame:
-                    hand_center = [(hand[0] + hand[2]) / 2, (hand[1] + hand[3]) / 2]
-    
-                    if is_inside(hand_center, pickup_coords):
-                        hand_detected_in_pickup = True
-                    if is_inside(hand_center, drop_coords):
-                        hand_detected_in_drop = True
-                    if is_entering_from_side(hand_center, pickup_coords, pickup_sides):
-                        entering_pickup = True
-                    if is_entering_from_side(hand_center, drop_coords, drop_sides):
-                        entering_drop = True
+                hand_detected_in_pickup = any(is_inside(hand, pickup_coords) for hand in hands_in_frame)
+                hand_detected_in_drop = any(is_inside(hand, drop_coords) for hand in hands_in_frame)
+                entering_pickup = any(is_entering_from_side(hand, pickup_coords, pickup_sides) for hand in hands_in_frame)
+                entering_drop = any(is_entering_from_side(hand, drop_coords, drop_sides) for hand in hands_in_frame)
 
                 current_date = datetime.now().strftime('%Y-%m-%d')
                 current_time = datetime.now().strftime('%H:%M:%S')
@@ -111,16 +99,8 @@ def process_video(video_url, pickup_coords, drop_coords, pickup_sides, drop_side
                 cv2.putText(frame, f"Entering Pickup: {entering_pickup}", (width - 200, 150), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
                 cv2.putText(frame, f"Entering Drop: {entering_drop}", (width - 200, 180), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
                 cv2.putText(frame, f"State: {state}", (width - 200, 210), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
-
-                pickup_polygon_np = np.array([pickup_coords], np.int32)
-                pickup_polygon_np = pickup_polygon_np.reshape((-1, 1, 2)) # Reshape for polylines
-                
-                drop_polygon_np = np.array([drop_coords], np.int32)
-                drop_polygon_np = drop_polygon_np.reshape((-1, 1, 2)) # Reshape for polylines
-                
-                cv2.polylines(frame, [pickup_polygon_np], isClosed=True, color=(0, 255, 0), thickness=2)
-                cv2.polylines(frame, [drop_polygon_np], isClosed=True, color=(0, 255, 0), thickness=2)
-
+                cv2.rectangle(frame, pickup_coords[0], pickup_coords[1], (0, 255, 0), 2)
+                cv2.rectangle(frame, drop_coords[0], drop_coords[1], (0, 255, 0), 2)
                 draw_sides(frame, pickup_coords, pickup_sides, (0, 0, 255))
                 draw_sides(frame, drop_coords, drop_sides, (0, 0, 255))
                 
